@@ -3,8 +3,10 @@ export type SearchType = {
 };
 
 export type SearchResult = {
-  id: number;
+  id: string;
   country: string;
   state: string;
   name: string;
+  displayName: string;
+  type: string;
 }

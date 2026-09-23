@@ -6,24 +6,28 @@ import { SearchResult, SearchType } from "@/src/components/utilities/types";
 import { SearchIcon } from "@/src/components/utilities/svg";
 import SearchDropdown from "@/src/components/searchDropdown";
 import { useCitySearch } from "@/src/hooks/useCitySearch";
+import CityDetail from "@/src/components/cityDetail";
 
 export default function Search() {
   const {
     register,
     watch,
+    setValue,
     formState: { errors },
   } = useForm<SearchType>();
 
   const searchValue = watch("search", "");
 
   const searchDropdownRef = useRef<HTMLDivElement>(null);
+  const isSelectingResult = useRef(false);
 
   const [showDropdown, setShowDropdown] = useState(false);
-  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [citySearch, setCitySearch] = useState("");
+  const [selectedCity, setSelectedCity] = useState<SearchResult | null>(null);
 
   const {
-    data: results = [], isLoading, isError, error
-  } = useCitySearch(debouncedSearch);
+    data: results = [], isFetching, isError, error
+  } = useCitySearch(citySearch);
 
   const errorMessage = isError
     ? error instanceof Error
@@ -32,21 +36,25 @@ export default function Search() {
     : "";
 
   useEffect(() => {
+    if (isSelectingResult.current) {
+      isSelectingResult.current = false;
+      return;
+    }
+
     const search = searchValue.trim();
 
     if (search.length < 3) {
-      setDebouncedSearch("");
+      setCitySearch("");
       setShowDropdown(false);
       return;
     }
 
-    const timeoutId = setTimeout(async () => {
-      console.log("Searching API for:", search);
-      setDebouncedSearch(search);
+    const searchTimeout = setTimeout(() => {
+      setCitySearch(search);
       setShowDropdown(true);
     }, 500);
 
-    return () => clearTimeout(timeoutId);
+    return () => clearTimeout(searchTimeout);
   }, [searchValue]);
 
   useEffect(() => {
@@ -64,8 +72,18 @@ export default function Search() {
     return () => { document.removeEventListener("mousedown", handleClickOutside); };
   }, []);
 
-  const handleSelectResult = () => {
-    console.log('result');
+  const handleSelectResult = (cityResult: SearchResult) => {
+    const cityName = cityResult.displayName;
+    isSelectingResult.current = true;
+    setValue('search', cityName);
+    setSelectedCity(cityResult)
+    setShowDropdown(false);
+  };
+
+  const handleCloseDetails = () => {
+    setSelectedCity(null);
+    setValue("search", "");
+    setCitySearch("");
     setShowDropdown(false);
   };
 
@@ -113,7 +131,7 @@ export default function Search() {
             <input
               id="search"
               type="text"
-              autoComplete="on"
+              autoComplete="off"
               placeholder="Search for a location..."
               {...register("search", {
                 required: "Location is required",
@@ -143,13 +161,20 @@ export default function Search() {
           {showDropdown && (
             <SearchDropdown
               results={results}
-              loading={isLoading}
+              loading={isFetching}
               error={errorMessage}
               onSelect={handleSelectResult}
             />
           )}
         </div>
       </form>
+
+      {selectedCity && (
+        <CityDetail
+          city={selectedCity}
+          onClose={handleCloseDetails}
+        />
+      )}
     </div>
   );
 }

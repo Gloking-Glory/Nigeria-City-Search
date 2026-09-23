@@ -39,7 +39,7 @@ export default function SearchDropdown({
                                 transition
                             "
                         >
-                            {result.name}
+                            {result.displayName}
                         </button>
                     </li>
                 ))}
