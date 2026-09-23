@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { SearchResult, SearchType } from "@/src/components/utilities/types";
 import { SearchIcon } from "@/src/components/utilities/svg";
 import SearchDropdown from "@/src/components/searchDropdown";
+import { useCitySearch } from "@/src/hooks/useCitySearch";
 
 export default function Search() {
   const {
@@ -15,58 +16,34 @@ export default function Search() {
 
   const searchValue = watch("search", "");
 
-  const [results, setResults] = useState<SearchResult[]>([]);
   const searchDropdownRef = useRef<HTMLDivElement>(null);
-  const [isLoading, setIsLoading] = useState(false);
+
   const [showDropdown, setShowDropdown] = useState(false);
-  const [error, setError] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+
+  const {
+    data: results = [], isLoading, isError, error
+  } = useCitySearch(debouncedSearch);
+
+  const errorMessage = isError
+    ? error instanceof Error
+      ? error.message 
+        : 'Unable to search locations.' 
+    : "";
 
   useEffect(() => {
     const search = searchValue.trim();
 
     if (search.length < 3) {
-      setResults([]);
+      setDebouncedSearch("");
       setShowDropdown(false);
-      setIsLoading(false);
-      setError("");
       return;
     }
 
     const timeoutId = setTimeout(async () => {
-      try {
-        setIsLoading(true);
-        setError("");
-        setShowDropdown(true);
-
-        console.log("Searching API for:", search);
-
-        // Temporary mock data for UI development
-        const mockResults: SearchResult[] = [
-          { id: 1, name: `${search}`, country: 'Country', state: 'State' },
-          { id: 2, name: `${search} District`, country: 'Country', state: 'State' },
-          { id: 3, name: `${search} State`, country: 'Country', state: 'State' },
-          { id: 1, name: `${search}`, country: 'Country', state: 'State' },
-          { id: 2, name: `${search} District`, country: 'Country', state: 'State' },
-          { id: 3, name: `${search} State`, country: 'Country', state: 'State' },
-          { id: 1, name: `${search}`, country: 'Country', state: 'State' },
-          { id: 2, name: `${search} District`, country: 'Country', state: 'State' },
-          { id: 3, name: `${search} State`, country: 'Country', state: 'State' },
-          { id: 1, name: `${search}`, country: 'Country', state: 'State' },
-          { id: 2, name: `${search} District`, country: 'Country', state: 'State' },
-          { id: 3, name: `${search} State`, country: 'Country', state: 'State' },
-          { id: 1, name: `${search}`, country: 'Country', state: 'State' },
-          { id: 2, name: `${search} District`, country: 'Country', state: 'State' },
-          { id: 3, name: `${search} State`, country: 'Country', state: 'State' },
-        ];
-
-        setResults(mockResults);
-      } catch (err) {
-        console.error(err);
-        setError("Unable to search locations.");
-        setResults([]);
-      } finally {
-        setIsLoading(false);
-      }
+      console.log("Searching API for:", search);
+      setDebouncedSearch(search);
+      setShowDropdown(true);
     }, 500);
 
     return () => clearTimeout(timeoutId);
@@ -167,7 +144,7 @@ export default function Search() {
             <SearchDropdown
               results={results}
               loading={isLoading}
-              error={error}
+              error={errorMessage}
               onSelect={handleSelectResult}
             />
           )}
