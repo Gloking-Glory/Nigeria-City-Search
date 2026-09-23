@@ -2,7 +2,8 @@ import { SearchResult } from "@/src/components/utilities/types";
 import { NominatimResponse } from "./types/nominatim";
 
 export async function searchNigeriaCities(
-  search: string
+  search: string,
+  signal?: AbortSignal
 ): Promise<SearchResult[]> {
   if (!search.trim()) return [];
 
@@ -19,6 +20,7 @@ export async function searchNigeriaCities(
 
   const response = await fetch(fetchCityUrl, {
     method: "GET",
+    signal
   });
 
   if (!response.ok) {
@@ -29,8 +31,8 @@ export async function searchNigeriaCities(
 
   const cityDetails = data.map((city) => ({
     id: city.place_id,
-    country: city.address?.country,
-    state: city.address?.state,
+    country: city.address?.country ?? "Nigeria",
+    state: city.address?.state ?? "",
     type: city.type,
     displayName: city.display_name,
     name: city.name

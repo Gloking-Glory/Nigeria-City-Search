@@ -4,7 +4,7 @@ import { searchNigeriaCities } from "@/src/services/nigeriaCitiesApi";
 export function useCitySearch(search: string) {
   return useQuery({
     queryKey: ["cities", search],
-    queryFn: () => searchNigeriaCities(search),
+    queryFn: ({ signal }) => searchNigeriaCities(search, signal),
     enabled: search.length >= 3,
   });
 }
