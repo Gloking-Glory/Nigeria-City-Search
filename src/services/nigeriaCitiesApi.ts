@@ -19,9 +19,6 @@ export async function searchNigeriaCities(
 
   const response = await fetch(fetchCityUrl, {
     method: "GET",
-    headers: {
-      "User-Agent": "SearchNigeriaCities/1.0 (ayanwola-glory)",
-    },
   });
 
   if (!response.ok) {
@@ -30,7 +27,7 @@ export async function searchNigeriaCities(
 
   const data: NominatimResponse = await response.json();
 
-  const cityDetails = data.length && data.map((city) => ({
+  const cityDetails = data.map((city) => ({
     id: city.place_id,
     country: city.address?.country,
     state: city.address?.state,

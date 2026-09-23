@@ -3,7 +3,7 @@ export type SearchType = {
 };
 
 export type SearchResult = {
-  id: string;
+  id: number;
   country: string;
   state: string;
   name: string;

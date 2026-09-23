@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Search Location App",
-  description: "Search Location App created with Next.js",
+  title: "Nigeria City Search",
+  description: "Search and explore cities across Nigeria",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

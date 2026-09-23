@@ -1,21 +1,18 @@
-import { SearchResult } from "@/src/components/utilities/types";
+"use client";
 
-type SelectedCityDetailsProps = {
-  city: SearchResult;
-  onClose: () => void;
-};
+import { SelectedCityDetailsProps } from "./utilities/propsTypes";
 
 export default function CityDetail({
   city,
   onClose,
 }: SelectedCityDetailsProps) {
   return (
-    <div className="relative mt-6 rounded-xl border border-gray-200 bg-gray-50 p-5">
+    <div className="relative mt-6 rounded-xl border border-gray-200 bg-gray-50 p-5 ml-5 w-96">
       <button
         type="button"
         onClick={onClose}
         aria-label="Close city details"
-        className="absolute right-3 top-3 rounded-full p-1 text-gray-400 transition hover:bg-gray-200 hover:text-gray-700"
+        className="absolute right-3 top-3 rounded-full p-1 text-gray-400 transition cursor-pointer"
       >
         ✕
       </button>

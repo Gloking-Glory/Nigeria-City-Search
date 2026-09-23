@@ -1,13 +1,6 @@
 "use client";
 
-import { SearchResult } from "./utilities/types";
-
-type SearchDropdownProps = {
-    results: SearchResult[];
-    loading: boolean;
-    error: string;
-    onSelect: (result: SearchResult) => void;
-}
+import { SearchDropdownProps } from "./utilities/propsTypes";
 
 export default function SearchDropdown({
     results, loading, error, onSelect
@@ -46,7 +39,7 @@ export default function SearchDropdown({
             </ul>
         ) : (
             <div className="px-4 py-3 text-sm text-gray-500">
-                No locations found.
+                No city located in Nigeria with that name.
             </div>
         )}
     </div>

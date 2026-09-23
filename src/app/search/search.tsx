@@ -99,17 +99,17 @@ export default function Search() {
           max-w-sm sm:max-w-md lg:max-w-lg
         "
       >
-        <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-6 text-center text-blue-600">
-          Search Location
+        <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-6 text-center text-emerald-300">
+          Nigeria City Search
         </h2>
 
         <div ref={searchDropdownRef} className="relative">
-          {/* <label
+          <label
             htmlFor="search"
-            className="block text-sm font-medium text-gray-700 mb-2"
+            className="block text-base font-medium text-emerald-700 mb-2"
           >
-            Location
-          </label> */}
+            Search and explore cities across Nigeria
+          </label>
 
           <div
             className={`
@@ -120,7 +120,7 @@ export default function Search() {
               ${
                 errors.search
                   ? "border-red-500"
-                  : "border-gray-300 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-100"
+                  : "border-green-300 focus-within:border-emerald-500 focus-within:ring-2 focus-within:ring-blue-100"
               }
             `}
           >
@@ -132,7 +132,7 @@ export default function Search() {
               id="search"
               type="text"
               autoComplete="off"
-              placeholder="Search for a location..."
+              placeholder="Search for a city in Nigeria e.g. Lagos, Ibadan..."
               {...register("search", {
                 required: "Location is required",
               })}
@@ -148,6 +148,7 @@ export default function Search() {
                 outline-none
                 text-gray-900
                 placeholder:text-gray-400
+                text-base
               "
             />
           </div>
