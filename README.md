@@ -6,7 +6,7 @@ Built for a frontend technical assessment using **Next.js, React, TypeScript, Ta
 
 ## Live Demo
 
-[View Live Demo](VERCEL_URL)
+[View Live Demo](https://nigeria-city-search.vercel.app/)
 
 ## Features
 
@@ -67,7 +67,7 @@ For testing, I would use Jest and React Testing Library to cover debounce behavi
 ## Running Locally
 
 ```bash
-git clone
+git clone https://github.com/Gloking-Glory/Nigeria-City-Search
 cd nigeria-city-search
 npm install
 npm run dev

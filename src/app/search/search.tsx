@@ -48,6 +48,7 @@ export default function Search() {
 
     if (search.length < 3) {
       setCitySearch("");
+      setSelectedCity(null);
       setShowDropdown(false);
       return;
     }
