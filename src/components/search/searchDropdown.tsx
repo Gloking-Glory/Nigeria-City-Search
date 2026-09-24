@@ -1,9 +1,10 @@
 "use client";
 
-import { SearchDropdownProps } from "./utilities/propsTypes";
+import { SearchDropdownProps } from "../utilities/propsTypes";
 
 export default function SearchDropdown({
-    results, loading, error, onSelect
+    results, loading, error, 
+    highlightedIndex, onMouseHighlight, onSelect
 }: SearchDropdownProps) {
   return (
     <div className="absolute z-10 mt-2 w-full overflow-hidden rounded-xl border border-gray-200 bg-white shadow-lg">
@@ -16,13 +17,17 @@ export default function SearchDropdown({
                 {error}
             </div>
         ) : results.length > 0 ? (
-            <ul className="max-h-[250px] overflow-y-auto">
-                {results.map((result) => (
+            <ul role="listbox" id="city-search-results" className="max-h-[250px] overflow-y-auto">
+                {results.map((result, index) => (
                     <li key={result.id}>
                         <button
+                            id={`city-option-${result.id}`}
                             type="button"
+                            role="option"
+                            aria-selected={highlightedIndex === index}
+                            onMouseEnter={() => onMouseHighlight(index)}
                             onClick={() => onSelect(result)}
-                            className="
+                            className={`
                                 w-full
                                 px-4 py-3
                                 text-left
@@ -30,7 +35,12 @@ export default function SearchDropdown({
                                 text-gray-700
                                 hover:bg-blue-50
                                 transition
-                            "
+                                ${
+                                    highlightedIndex === index
+                                    ? "bg-blue-50"
+                                    : ""
+                                }
+                            `}
                         >
                             {result.displayName}
                         </button>

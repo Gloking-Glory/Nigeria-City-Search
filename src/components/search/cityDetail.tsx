@@ -1,6 +1,6 @@
 "use client";
 
-import { SelectedCityDetailsProps } from "./utilities/propsTypes";
+import { SelectedCityDetailsProps } from "../utilities/propsTypes";
 
 export default function CityDetail({
   city,
