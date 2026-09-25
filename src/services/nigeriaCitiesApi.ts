@@ -20,7 +20,10 @@ export async function searchNigeriaCities(
 
   const response = await fetch(fetchCityUrl, {
     method: "GET",
-    signal
+    signal,
+    headers: {
+      "User-Agent": "SearchNigeriaCities/1.0 (ayanwola-glory)",
+    }
   });
 
   if (!response.ok) {

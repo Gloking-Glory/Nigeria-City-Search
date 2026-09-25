@@ -91,6 +91,12 @@ Nominatim usage policy:
 
 https://operations.osmfoundation.org/policies/nominatim/
 
+### API Consideration
+
+This project uses a public geocoding API for the city search. The initial implementation evaluated OpenStreetMap Nominatim because of its detailed location and address data. However, Nominatim's public usage policy does not support client-side autocomplete and recommends a proxy/caching architecture for applications using the service.
+
+For a production implementation, I would either use a geocoding provider designed for autocomplete or place the API behind a server-side route with appropriate caching, rate limiting, and provider failover.
+
 ## Project Structure
 
 ```text
