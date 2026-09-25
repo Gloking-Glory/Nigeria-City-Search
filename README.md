@@ -2,7 +2,7 @@
 
 A responsive typeahead/autocomplete search for discovering cities and settlements across Nigeria.
 
-Built for a frontend technical assessment using **Next.js, React, TypeScript, Tailwind CSS, React Hook Form, TanStack Query, and Nominatim/OpenStreetMap**.
+Built as a frontend technical assessment using **Next.js, React, TypeScript, Tailwind CSS, React Hook Form, TanStack Query, and Open-Meteo**.
 
 ## Live Demo
 
@@ -15,7 +15,7 @@ Built for a frontend technical assessment using **Next.js, React, TypeScript, Ta
 * Minimum 3-character search
 * Loading, empty, and error states
 * Mouse and keyboard navigation
-* `ArrowUp` / `ArrowDown` navigation
+* `ArrowUp` / `ArrowDown` navigation with scroll support
 * `Enter` to select a result
 * `Escape` to close
 * Click-away dropdown handling
@@ -23,16 +23,17 @@ Built for a frontend technical assessment using **Next.js, React, TypeScript, Ta
 * Selected city details
 * Accessible combobox/listbox semantics
 * Request cancellation and query caching
+* Responsive UI
 
 ## Tech Stack
 
-* **Next.js** – application framework
-* **React + TypeScript** – UI and type safety
-* **Tailwind CSS** – styling and responsive design
-* **React Hook Form** – input handling
-* **TanStack Query** – server state, caching and request lifecycle
-* **Nominatim/OpenStreetMap** – location search data
-* **Vercel** – deployment
+* **Next.js** — application framework
+* **React + TypeScript** — UI and type safety
+* **Tailwind CSS** — styling and responsive design
+* **React Hook Form** — form and input handling
+* **TanStack Query** — server state, caching, and request lifecycle
+* **Open-Meteo Geocoding API** — location search data
+* **Vercel** — deployment
 
 ## How It Works
 
@@ -45,7 +46,7 @@ User types
     ↓
 TanStack Query
     ↓
-Nominatim API
+Open-Meteo Geocoding API
     ↓
 Display results
     ↓
@@ -54,22 +55,25 @@ Select city
 Show city details
 ```
 
-TanStack Query uses the search term as part of the query key and passes an `AbortSignal` to the API request. This helps manage asynchronous requests and prevents obsolete requests from unnecessarily continuing.
+TanStack Query uses the search term as part of the query key and passes an `AbortSignal` to the API request. This allows previous requests to be cancelled when appropriate while keeping each search associated with its own query state.
 
 ## Tradeoffs, Scaling & Testing
 
-I intentionally kept the implementation lightweight and focused on the assessment requirements rather than introducing unnecessary abstractions or dependencies. I used Next.js, TypeScript, React Hook Form, and TanStack Query, with Nominatim providing the location data. A 500ms debounce and a minimum three-character search threshold reduce unnecessary requests while keeping the search responsive. TanStack Query also provides caching and request cancellation through its `AbortSignal`, which helps prevent stale requests from interfering with newer searches.
+I intentionally kept the implementation lightweight and focused on the assessment requirements rather than introducing unnecessary abstractions or dependencies. A 500ms debounce and minimum three-character search threshold reduce unnecessary API requests while keeping the search responsive. TanStack Query provides caching, query lifecycle management, and request cancellation through `AbortSignal`.
 
-For higher traffic, I would move the geocoding request behind a server-side endpoint rather than calling the external service directly from the browser. This would provide better control over rate limiting, caching, request validation, timeouts, monitoring, and upstream API usage. Frequently searched locations could be cached at the server or CDN level. At significantly higher scale, I would consider a dedicated geocoding provider or an indexed location database.
+For higher traffic, I would move the geocoding request behind a server-side endpoint. This would provide better control over rate limiting, caching, request validation, timeouts, monitoring, and upstream API usage. Frequently searched locations could also be cached at the server or CDN level. At significantly higher scale, I would consider a dedicated geocoding provider or an indexed location database.
 
-For testing, I would use Jest and React Testing Library to cover debounce behaviour, the minimum search length, loading, empty and error states, keyboard navigation, result selection, Escape handling, click-away behaviour, and stale-response scenarios. I would also add an end-to-end test covering the main search flow.
+For testing, I would use Jest and React Testing Library to cover debounce behaviour, minimum search length, loading, empty and error states, keyboard navigation, result selection, Escape handling, click-away behaviour, and stale-response scenarios. I would also add an end-to-end test covering the main search flow.
 
 ## Running Locally
 
 ```bash
-git clone https://github.com/Gloking-Glory/Nigeria-City-Search
-cd nigeria-city-search
+git clone https://github.com/Gloking-Glory/Nigeria-City-Search.git
+
+cd Nigeria-City-Search
+
 npm install
+
 npm run dev
 ```
 
@@ -83,19 +87,11 @@ npm run build
 
 ## API
 
-This project uses the public **Nominatim API** with OpenStreetMap data.
+This project uses the public **Open-Meteo Geocoding API** to search for locations in Nigeria.
 
-For a production application, I would use a server-side integration with appropriate caching and rate limiting, or a geocoding provider designed for the expected traffic and autocomplete use case.
+The API does not require an API key for the use case covered by this assessment.
 
-Nominatim usage policy:
-
-https://operations.osmfoundation.org/policies/nominatim/
-
-### API Consideration
-
-This project uses a public geocoding API for the city search. The initial implementation evaluated OpenStreetMap Nominatim because of its detailed location and address data. However, Nominatim's public usage policy does not support client-side autocomplete and recommends a proxy/caching architecture for applications using the service.
-
-For a production implementation, I would either use a geocoding provider designed for autocomplete or place the API behind a server-side route with appropriate caching, rate limiting, and provider failover.
+For a production application with significantly higher traffic, I would introduce a server-side integration with appropriate caching, rate limiting, monitoring, and timeout handling, or use a geocoding provider designed for the expected production workload.
 
 ## Project Structure
 

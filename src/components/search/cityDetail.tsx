@@ -7,7 +7,7 @@ export default function CityDetail({
   onClose,
 }: SelectedCityDetailsProps) {
   return (
-    <div className="relative mt-6 rounded-xl border border-gray-200 bg-gray-50 p-5 ml-5 w-96">
+    <div className="relative rounded-xl lg:max-w-md border border-gray-200 bg-gray-50 p-5 w-full max-w-sm">
       <button
         type="button"
         onClick={onClose}

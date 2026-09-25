@@ -1,13 +1,15 @@
 import { UseFormRegister } from "react-hook-form";
 import { SearchResult, SearchType } from "./types";
+import { RefObject } from "react";
 
 export type SearchDropdownProps = {
-    results: SearchResult[];
-    loading: boolean;
-    error: string;
-    highlightedIndex: number;
-    onSelect: (result: SearchResult) => void;
-    onMouseHighlight: (index: number) => void;
+  results: SearchResult[];
+  loading: boolean;
+  error: string;
+  highlightedIndex: number;
+  onSelect: (result: SearchResult) => void;
+  onMouseHighlight: (index: number) => void;
+  highlightedOptionRef: RefObject<HTMLButtonElement | null>;
 }
 
 export type SelectedCityDetailsProps = {

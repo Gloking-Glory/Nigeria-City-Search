@@ -1,5 +1,5 @@
 import { SearchResult } from "@/src/components/utilities/types";
-import { NominatimResponse } from "./types/nominatim";
+import { OpenMeteoResponse } from "./types/openMeteo";
 
 export async function searchNigeriaCities(
   search: string,
@@ -8,37 +8,32 @@ export async function searchNigeriaCities(
   if (!search.trim()) return [];
 
   const params = new URLSearchParams({
-    q: search,
-    countrycodes: "ng",
-    featuretype: "settlement",
-    addressdetails: "1",
+    name: search,
+    countryCode: "NG",
+    count: "20",
+    language: "en",
     format: "json",
-    limit: "5",
   });
 
-  const fetchCityUrl = `https://nominatim.openstreetmap.org/search?${params.toString()}`;
-
-  const response = await fetch(fetchCityUrl, {
-    method: "GET",
-    signal,
-    headers: {
-      "User-Agent": "SearchNigeriaCities/1.0 (ayanwola-glory)",
-    }
-  });
+  const response = await fetch(
+    `https://geocoding-api.open-meteo.com/v1/search?${params}`,
+    { signal }
+  );
 
   if (!response.ok) {
     throw new Error("Failed to fetch cities");
   }
 
-  const data: NominatimResponse = await response.json();
+  const data: OpenMeteoResponse = await response.json();
 
-  const cityDetails = data.map((city) => ({
-    id: city.place_id,
-    country: city.address?.country ?? "Nigeria",
-    state: city.address?.state ?? "",
-    type: city.type,
-    displayName: city.display_name,
-    name: city.name
+  const cityDetails = (data.results ?? []).map((city) => ({
+    id: city.id,
+    name: city.name,
+    country: city.country,
+    state: city.admin1 ?? "",
+    localGov: city.admin2 ?? "",
+    displayName: `${city.name}${city.admin2 ? `, ${city.admin2} LG` : ""}, ${city.admin1}, ${city.country}`,
+    type: city.feature_code,
   }));
 
   return cityDetails;

@@ -19,8 +19,9 @@ export default function Search() {
   const searchValue = watch("search", "");
 
   const searchDropdownRef = useRef<HTMLDivElement>(null);
+  const highlightedOptionRef = useRef<HTMLButtonElement>(null);  
   const isSelectingResult = useRef(false);
-  
+
   const [highlightedIndex, setHighlightedIndex] = useState(-1);   // handles dropdown options keyboard nav index
   const [showDropdown, setShowDropdown] = useState(false);
   const [citySearch, setCitySearch] = useState("");
@@ -76,6 +77,15 @@ export default function Search() {
 
     return () => { document.removeEventListener("mousedown", handleClickOutside); };
   }, []);
+
+  useEffect(() => {
+    // this add an effects that scrolls highlighted item into view when showing result dropdown
+    if (highlightedIndex >= 0) {
+      highlightedOptionRef.current?.scrollIntoView({
+        block: "nearest",   // Only scroll if necessary to bring the highlighted element into the visible area
+      });
+    }
+  }, [highlightedIndex]);
 
   const handleSelectResult = (cityResult: SearchResult) => {
     const cityName = cityResult.displayName;
@@ -148,7 +158,7 @@ export default function Search() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[url('/images/background.png')] bg-cover bg-center px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen flex flex-col lg:flew-row gap-6 items-center justify-center bg-[url('/images/background.png')] bg-cover bg-center px-4 sm:px-6 lg:px-8">
       <form
         onSubmit={(event) => event.preventDefault()}
         className="
@@ -183,6 +193,7 @@ export default function Search() {
               highlightedIndex={highlightedIndex}
               onSelect={handleSelectResult}
               onMouseHighlight={setHighlightedIndex}
+              highlightedOptionRef={highlightedOptionRef}
             />
           )}
         </div>

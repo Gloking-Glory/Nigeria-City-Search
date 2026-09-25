@@ -9,4 +9,5 @@ export type SearchResult = {
   name: string;
   displayName: string;
   type: string;
+  localGov?: string;
 }

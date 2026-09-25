@@ -3,7 +3,7 @@
 import { SearchDropdownProps } from "../utilities/propsTypes";
 
 export default function SearchDropdown({
-    results, loading, error, 
+    results, loading, error, highlightedOptionRef,
     highlightedIndex, onMouseHighlight, onSelect
 }: SearchDropdownProps) {
   return (
@@ -21,6 +21,7 @@ export default function SearchDropdown({
                 {results.map((result, index) => (
                     <li key={result.id}>
                         <button
+                            ref={highlightedIndex === index ? highlightedOptionRef : null}
                             id={`city-option-${result.id}`}
                             type="button"
                             role="option"
