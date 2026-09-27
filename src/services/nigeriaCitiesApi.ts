@@ -32,7 +32,7 @@ export async function searchNigeriaCities(
     country: city.country,
     state: city.admin1 ?? "",
     localGov: city.admin2 ?? "",
-    displayName: `${city.name}${city.admin2 ? `, ${city.admin2} LG` : ""}, ${city.admin1}, ${city.country}`,
+    displayName: `${city.name}${city.admin2 ? `, ${city.admin2} LG` : ""}, ${city.admin1} State, ${city.country}`,
     type: city.feature_code,
   }));
 
