@@ -22,3 +22,13 @@ export const mockResults: SearchResult[] = [
     type: "PPL",
   },
 ];
+
+export const mockCity: SearchResult = {
+  id: 1,
+  name: "Lagos",
+  localGov: "",
+  state: "Lagos",
+  country: "Nigeria",
+  displayName: "Lagos, Lagos State, Nigeria",
+  type: "PPLA2",
+};

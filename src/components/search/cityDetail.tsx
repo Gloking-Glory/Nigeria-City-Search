@@ -6,6 +6,10 @@ export default function CityDetail({
   city,
   onClose,
 }: SelectedCityDetailsProps) {
+  const {
+    name, displayName, localGov, state, country, type
+  } = city;
+
   return (
     <div className="relative rounded-xl lg:max-w-md border border-gray-200 bg-gray-50 p-5 w-full max-w-sm">
       <button
@@ -24,27 +28,34 @@ export default function CityDetail({
       <div className="space-y-3 text-sm">
         <div>
           <p className="text-gray-500">Name</p>
-          <p className="font-medium text-gray-900">{city.name}</p>
+          <p className="font-medium text-gray-900">{name}</p>
         </div>
+
+        {localGov && (
+          <div>
+            <p className="text-gray-500">Local Government</p>
+            <p className="font-medium text-gray-900">{localGov}</p>
+          </div>
+        )}
 
         <div>
           <p className="text-gray-500">State</p>
-          <p className="font-medium text-gray-900">{city.state}</p>
+          <p className="font-medium text-gray-900">{state} State</p>
         </div>
 
         <div>
           <p className="text-gray-500">Country</p>
-          <p className="font-medium text-gray-900">{city.country}</p>
+          <p className="font-medium text-gray-900">{country}</p>
         </div>
 
         <div>
           <p className="text-gray-500">Display Name</p>
-          <p className="font-medium text-gray-900">{city.displayName}</p>
+          <p className="font-medium text-gray-900">{displayName}</p>
         </div>
 
         <div>
           <p className="text-gray-500">Type</p>
-          <p className="font-medium capitalize text-gray-900">{city.type}</p>
+          <p className="font-medium capitalize text-gray-900">{type}</p>
         </div>
       </div>
     </div>

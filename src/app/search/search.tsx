@@ -158,7 +158,7 @@ export default function Search() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col lg:flew-row gap-6 items-center justify-center bg-[url('/images/background.png')] bg-cover bg-center px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen flex flex-col lg:flex-row gap-6 items-center justify-center bg-[url('/images/background.png')] bg-cover bg-center px-4 sm:px-6 lg:px-8">
       <form
         onSubmit={(event) => event.preventDefault()}
         className="
