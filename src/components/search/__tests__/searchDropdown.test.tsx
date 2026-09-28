@@ -1,29 +1,8 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { RefObject } from "react";
-import { SearchResult } from "../../utilities/types";
 import SearchDropdown from "../searchDropdown";
-
-const mockResults: SearchResult[] = [
-  {
-    id: 1,
-    name: "Lagos",
-    localGov: "",
-    state: "Lagos",
-    country: "Nigeria",
-    displayName: "Lagos, Lagos State, Nigeria",
-    type: "PPLA2",
-  },
-  {
-    id: 2,
-    name: "Lagos",
-    localGov: "Ndokwa East",
-    state: "Delta State",
-    country: "Nigeria",
-    displayName: "Lagos-Iyidi, Ndokwa East LG, Delta State, Nigeria",
-    type: "PPL",
-  },
-];
+import { mockResults } from "../testsUtilities/mocks";
 
 describe("SearchDropdown", () => {
   const highlightedOptionRef = { current: null } as RefObject<HTMLButtonElement | null>;

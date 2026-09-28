@@ -1,4 +1,4 @@
-"use-client";
+"use client";
 
 import { SearchInputProps } from "../utilities/propsTypes";
 import { SearchIcon } from "../utilities/svg";
