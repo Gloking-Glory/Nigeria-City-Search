@@ -5,10 +5,12 @@ export async function searchNigeriaCities(
   search: string,
   signal?: AbortSignal
 ): Promise<SearchResult[]> {
-  if (!search.trim()) return [];
+  const searchValue = search.trim();
+
+  if (searchValue.length < 3) return [];
 
   const params = new URLSearchParams({
-    name: search,
+    name: searchValue,
     countryCode: "NG",
     count: "20",
     language: "en",
@@ -26,15 +28,28 @@ export async function searchNigeriaCities(
 
   const data: OpenMeteoResponse = await response.json();
 
-  const cityDetails = (data.results ?? []).map((city) => ({
-    id: city.id,
-    name: city.name,
-    country: city.country,
-    state: city.admin1 ?? "",
-    localGov: city.admin2 ?? "",
-    displayName: `${city.name}${city.admin2 ? `, ${city.admin2} LG` : ""}, ${city.admin1} State, ${city.country}`,
-    type: city.feature_code,
-  }));
+  const cityDetails = (data.results ?? []).map((city) => {
+    const {
+      id, name, country,
+      admin1: state, admin2: localGov, feature_code: type
+    } = city;
+
+    const formattedState =
+      state === "Federal Capital Territory" || state === "FCT"
+        ? "FCT"
+        : state?.toLowerCase().endsWith("state")
+          ? state
+          : state
+            ? `${state} State`
+            : "";
+    
+    return {
+      id, name, country, type,
+      state: state ?? "",
+      localGov: localGov ?? "",
+      displayName: `${name}${localGov ? `, ${localGov} LG` : ""}, ${formattedState}, ${country}`,
+    }
+  });
 
   return cityDetails;
 }
