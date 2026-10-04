@@ -36,4 +36,22 @@ describe("searchNigeriaCities", () => {
     expect(result).toEqual([]);
     expect(fetchMock).not.toHaveBeenCalled();
   });
+
+  it("sends correct API parameters", async () => {
+    fetchMock.mockResolvedValue({
+      ok: true,
+      json: async () => ({ results: [] }),
+    } as Response);
+
+    await searchNigeriaCities("Lagos");
+
+    const requestUrl = fetchMock.mock.calls[0][0] as string;
+    const url = new URL(requestUrl);
+
+    expect(url.searchParams.get("name")).toBe("Lagos");
+    expect(url.searchParams.get("countryCode")).toBe("NG");
+    expect(url.searchParams.get("count")).toBe("20");
+    expect(url.searchParams.get("language")).toBe("en");
+    expect(url.searchParams.get("format")).toBe("json");
+  });
 });
