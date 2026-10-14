@@ -40,7 +40,7 @@ export default function CityDetail({
 
         <div>
           <p className="text-gray-500">State</p>
-          <p className="font-medium text-gray-900">{state} State</p>
+          <p className="font-medium text-gray-900">{state}</p>
         </div>
 
         <div>

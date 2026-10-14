@@ -7,7 +7,7 @@ export const mockResults: SearchResult[] = [
     id: 1,
     name: "Lagos",
     localGov: "",
-    state: "Lagos",
+    state: "Lagos State",
     country: "Nigeria",
     displayName: "Lagos, Lagos State, Nigeria",
     type: "PPLA2",
@@ -27,8 +27,26 @@ export const mockCity: SearchResult = {
   id: 1,
   name: "Lagos",
   localGov: "",
-  state: "Lagos",
+  state: "Lagos State",
   country: "Nigeria",
   displayName: "Lagos, Lagos State, Nigeria",
   type: "PPLA2",
+};
+
+export const mockApiResult = {
+  id: 7099097,
+  name: "Lagos Iyede-Ame",
+  country: "Nigeria",
+  feature_code: "PPLA2",
+  admin1: "Delta",
+  admin2: "Ndokwa East"
+};
+
+export const fctMockResult = {
+  id: 2352778,
+  name: "Abuja",
+  country: "Nigeria",
+  feature_code: "PPLA2",
+  admin1: "FCT",
+  admin2: "Municipal Area Council"
 };
