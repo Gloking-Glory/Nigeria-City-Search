@@ -43,12 +43,21 @@ export async function searchNigeriaCities(
             ? `${state} State`
             : "";
     
-    return {
+    const displayName = [
+      name,
+      localGov ? `${localGov} LG` : null,
+      formattedState || null,
+      country
+    ].filter(Boolean).join(", ");
+    
+    const cityInfo = {
       id, name, country, type,
-      state: state ?? "",
+      state: formattedState ?? "",
       localGov: localGov ?? "",
-      displayName: `${name}${localGov ? `, ${localGov} LG` : ""}, ${formattedState}, ${country}`,
-    }
+      displayName
+    };
+
+    return cityInfo;
   });
 
   return cityDetails;

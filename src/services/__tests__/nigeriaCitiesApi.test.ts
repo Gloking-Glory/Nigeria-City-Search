@@ -1,12 +1,17 @@
-import { fctMockResult, mockApiResult } from "@/src/components/search/testsUtilities/mocks";
+import { fctMockResult, mockApiResult, stateSuffixMockResult } from "@/src/components/search/testsUtilities/mocks";
 import { searchNigeriaCities } from "../nigeriaCitiesApi";
 
 describe("searchNigeriaCities", () => {
   const fetchMock = jest.fn();
+  const originalFetch = global.fetch;
 
   beforeEach(() => {
     fetchMock.mockReset();
     global.fetch = fetchMock;
+  });
+
+  afterAll(() => {
+    global.fetch = originalFetch;
   });
 
   it("trims whitespace before searching", async () => {
@@ -74,31 +79,45 @@ describe("searchNigeriaCities", () => {
       name: "Lagos Iyede-Ame",
       country: "Nigeria",
       type: "PPLA2",
-      state: "Delta",
+      state: "Delta State",
       localGov: "Ndokwa East",
       displayName: "Lagos Iyede-Ame, Ndokwa East LG, Delta State, Nigeria"
     });
   });
 
-  it("adds State suffix when the API response does not include it", async () => {
+  it("does not duplicate State suffix when API already includes it", async () => {
     fetchMock.mockResolvedValue({
       ok: true,
       json: async () => ({
-        results: [ mockApiResult ],
+        results: [ stateSuffixMockResult ],
       }),
     } as Response);
 
-    const result = await searchNigeriaCities("Lagos");
+    const result = await searchNigeriaCities("Oyo");
+
+    expect(result[0].state).toBe("Oyo State");
+    expect(result[0].displayName).toBe("Oyo, Oyo West LG, Oyo State, Nigeria")
+  });
+
+  it("handles missing state and local government", async () => {
+    fetchMock.mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        results: [{
+          id: 4, name: "Lag",
+          country: "Nigeria", feature_code: "PPL"
+        }]
+      })
+    } as Response);
+
+    const result = await searchNigeriaCities("Lag");
 
     expect(result[0]).toEqual({
-      id: 7099097,
-      name: "Lagos Iyede-Ame",
-      country: "Nigeria",
-      type: "PPLA2",
-      state: "Delta",
-      localGov: "Ndokwa East",
-      displayName: "Lagos Iyede-Ame, Ndokwa East LG, Delta State, Nigeria"
-    });    
+      id: 4, name: "Lag",
+      country: "Nigeria", type: "PPL",
+      state: "", localGov: "",
+      displayName: "Lag, Nigeria"
+    });
   });
 
   it("formats Abuja FCT", async () => {
@@ -139,7 +158,7 @@ describe("searchNigeriaCities", () => {
     expect(result).toEqual([]);
   });
   
-  it("throws an error when API request fail", async () => {
+  it("throws an error when API responds with a failure status", async () => {
     fetchMock.mockResolvedValue({
       ok: false,
       status: 500,
@@ -148,5 +167,33 @@ describe("searchNigeriaCities", () => {
     await expect(
       searchNigeriaCities("Lagos")
     ).rejects.toThrow("Failed to fetch cities");
+  });
+
+  it("handles network error", async () => {
+    fetchMock.mockRejectedValue(
+      new Error("Network Error")
+    );
+
+    await expect(
+      searchNigeriaCities("Lagos")
+    ).rejects.toThrow("Network Error");
+  });
+
+  it("passes the AbortSignal to fetch", async () => {
+    const abortController = new AbortController();
+
+    fetchMock.mockResolvedValue({
+      ok: true,
+      json: async () => ({ results: [] }),
+    } as Response);
+    
+    await searchNigeriaCities("Lagos", abortController.signal);
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      expect.stringContaining("name=Lagos"),
+      expect.objectContaining({
+        signal: abortController.signal
+      })
+    );
   });
 });

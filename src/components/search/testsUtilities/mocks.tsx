@@ -1,5 +1,3 @@
-"use client";
-
 import { SearchResult } from "../../utilities/types";
 
 export const mockResults: SearchResult[] = [
@@ -40,6 +38,15 @@ export const mockApiResult = {
   feature_code: "PPLA2",
   admin1: "Delta",
   admin2: "Ndokwa East"
+};
+
+export const stateSuffixMockResult = {
+  id: 2325200,
+  name: "Oyo",
+  country: "Nigeria",
+  feature_code: "PPLA2",
+  admin1: "Oyo State",
+  admin2: "Oyo West",
 };
 
 export const fctMockResult = {
