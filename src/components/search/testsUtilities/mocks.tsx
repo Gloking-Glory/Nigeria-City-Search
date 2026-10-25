@@ -57,3 +57,13 @@ export const fctMockResult = {
   admin1: "FCT",
   admin2: "Municipal Area Council"
 };
+
+export const abujaMockCity: SearchResult = {
+  id: 2352778,
+  name: "Abuja",
+  country: "Nigeria",
+  type: "PPLA2",
+  state: "FCT",
+  localGov: "Municipal Area Council",
+  displayName: "Abuja, Municipal Area Council LG, FCT, Nigeria",
+};

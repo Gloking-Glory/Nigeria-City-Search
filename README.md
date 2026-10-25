@@ -2,7 +2,7 @@
 
 A responsive typeahead/autocomplete search for discovering cities and settlements across Nigeria.
 
-Built as a frontend technical assessment using **Next.js, React, TypeScript, Tailwind CSS, React Hook Form, TanStack Query, and Open-Meteo**.
+Built as a frontend simple application using **Next.js, React, TypeScript, Tailwind CSS, React Hook Form, TanStack Query, and Open-Meteo**.
 
 ## Live Demo
 
