@@ -29,11 +29,11 @@ describe("SearchInput", () => {
     render(<TestSearchInput />);
 
     expect(
-        screen.getByLabelText("Search and explore cities across Nigeria")
+      screen.getByLabelText("Search and explore cities across Nigeria")
     ).toBeInTheDocument();
 
     expect(
-        screen.getByPlaceholderText("Search for a city in Nigeria e.g. Lagos, Ibadan...")
+      screen.getByPlaceholderText("Search for a city in Nigeria e.g. Lagos, Ibadan...")
     ).toBeInTheDocument();
   });
 
