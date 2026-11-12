@@ -54,6 +54,9 @@ export default function Search() {
       return;
     }
 
+    setShowDropdown(false);
+    setHighlightedIndex(-1);
+
     const searchTimeout = setTimeout(() => {
       setCitySearch(search);
       setShowDropdown(true);

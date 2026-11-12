@@ -1,4 +1,6 @@
-import { within, render, screen, act } from "@testing-library/react";
+import {
+  within, fireEvent, render, screen, act
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import Search from "../search";
 import { useCitySearch } from "@/src/hooks/useCitySearch";
@@ -11,8 +13,14 @@ jest.mock("@/src/hooks/useCitySearch", () => ({
 const mockUseCitySearch = jest.mocked(useCitySearch);
 
 describe("Search", () => {
+  const originalScrollView = window.HTMLElement.prototype.scrollIntoView;
+
   beforeAll(() => {
     window.HTMLElement.prototype.scrollIntoView = jest.fn();
+  });
+
+  afterAll(() => {
+    window.HTMLElement.prototype.scrollIntoView = originalScrollView;
   });
 
   beforeEach(() => {
@@ -57,6 +65,10 @@ describe("Search", () => {
 
     expect(
       screen.queryByRole("listbox")
+    ).not.toBeInTheDocument();
+    
+    expect(
+      screen.queryByText("No city located in Nigeria with that name.")
     ).not.toBeInTheDocument();
   });
 
@@ -120,7 +132,7 @@ describe("Search", () => {
     expect(mockUseCitySearch).toHaveBeenLastCalledWith("Lag");
   });
 
-  it("cancels the previous pending search when user type before 500ms", async () => {
+  it("cancels the previous pending search when the user type before 500ms", async () => {
     jest.useFakeTimers();
     const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
     render(<Search />);
@@ -431,7 +443,7 @@ describe("Search", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("closes the dropdown when user click outside the search area", async () => {
+  it("closes the dropdown when the user clicks outside the search area", async () => {
     jest.useFakeTimers();
     mockUseCitySearch.mockReturnValue({
       data: mockResults,
@@ -463,7 +475,7 @@ describe("Search", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("reopen dropdown when user focuses on input after clicking outside", async () => {
+  it("reopens the dropdown when the user focuses on the input after clicking outside", async () => {
     jest.useFakeTimers();
     mockUseCitySearch.mockReturnValue({
       data: mockResults,
@@ -757,7 +769,7 @@ describe("Search", () => {
 
     expect(options[0]).toHaveAttribute("aria-selected", "false");
 
-    for(let i = 0; i < options.length; i++) {
+    for (let i = 0; i < options.length; i++) {
       await user.keyboard("{ArrowDown}");
     }
 
@@ -797,17 +809,18 @@ describe("Search", () => {
     expect(options[0]).toHaveAttribute("aria-selected", "false");
 
     await user.keyboard("{ArrowDown}");
+    await user.keyboard("{ArrowDown}");
     
-    expect(options[0]).toHaveAttribute("aria-selected", "true");
+    expect(options[1]).toHaveAttribute("aria-selected", "true");
 
     await user.keyboard("{Enter}");
 
-    expect(input).toHaveValue(mockResults[0].displayName);
+    expect(input).toHaveValue(mockResults[1].displayName);
     expect(
       screen.getByRole("heading", { name: "City Details" })
     ).toBeInTheDocument();
 
-    const { name } = mockResults[0];
+    const { name } = mockResults[1];
 
     const detailContainer = screen.getByRole("heading", {
       name: "City Details",
@@ -848,13 +861,10 @@ describe("Search", () => {
 
     await user.keyboard("{Enter}");
 
+    expect(input).toHaveValue("Lagos");
     expect(
       screen.queryByRole("heading", { name: "City Details" })
     ).not.toBeInTheDocument();
-
-    const { name } = mockResults[0];
-
-    expect(screen.queryByText(name)).not.toBeInTheDocument();
   });
 
   it("does not highlight or select a result when there are no results", async () => {
@@ -882,6 +892,7 @@ describe("Search", () => {
     ).not.toBeInTheDocument();
 
     await user.keyboard("{ArrowDown}");
+    await user.keyboard("{Enter}");
 
     const option = screen.queryByRole("option");
 
@@ -1019,6 +1030,410 @@ describe("Search", () => {
     expect(input).toHaveValue("");
     expect(
       screen.queryByRole("heading", { name: "City Details" })
+    ).not.toBeInTheDocument();
+  });
+
+  it("does nothing when Escape is pressed while dropdown and city details are closed", async () => {
+    jest.useFakeTimers();
+    mockUseCitySearch.mockReturnValue({
+      data: [],
+      isFetching: false,
+      isError: false,
+      error: null,
+    } as ReturnType<typeof useCitySearch>);
+
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    render(<Search />);
+
+    const input = screen.getByRole("combobox");
+    await user.type(input, "La");
+
+    expect(mockUseCitySearch).not.toHaveBeenCalledWith("La");
+
+    await user.keyboard("{Escape}");
+
+    expect(input).toHaveValue("La");
+    expect(input).toHaveFocus();
+    expect(
+      screen.getByRole("heading", { name: "Nigeria City Search" })
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("listbox")
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("heading", { name: "City Details" })
+    ).not.toBeInTheDocument();
+  });
+
+  it("keeps the dropdown open when the user clicks inside the search area", async () => {
+    jest.useFakeTimers();
+    mockUseCitySearch.mockReturnValue({
+      data: mockResults,
+      isFetching: false,
+      isError: false,
+      error: null,
+    } as ReturnType<typeof useCitySearch>);
+
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    render(<Search />);
+
+    const input = screen.getByRole("combobox");
+    await user.type(input, "Lagos");
+
+    act(() => {
+      jest.advanceTimersByTime(500);
+    });
+
+    expect(mockUseCitySearch).toHaveBeenLastCalledWith("Lagos");
+
+    const options = screen.getAllByRole("option");
+
+    expect(options).toHaveLength(mockResults.length);
+    expect(
+      screen.getByRole("listbox")
+    ).toBeInTheDocument();
+
+    await user.click(input);
+
+    expect(
+      screen.getByRole("listbox")
+    ).toBeInTheDocument();
+  });
+
+  it("clears selected city details when a new valid search starts", async () => {
+    jest.useFakeTimers();
+    mockUseCitySearch.mockReturnValue({
+      data: mockResults,
+      isFetching: false,
+      isError: false,
+      error: null
+    } as ReturnType<typeof useCitySearch>);
+
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    render(<Search />);
+
+    const input = screen.getByRole("combobox");
+    await user.type(input, "Lagos");
+    
+    act(() => {
+      jest.advanceTimersByTime(500);
+    });
+    
+    expect(mockUseCitySearch).toHaveBeenLastCalledWith("Lagos");
+
+    await user.keyboard("{ArrowDown}");
+    await user.keyboard("{Enter}");
+    
+    expect(input).toHaveValue(mockResults[0].displayName);
+    
+    expect(
+      screen.getByRole("heading", { name: "City Details" })
+    ).toBeInTheDocument();
+
+    await user.clear(input);
+    await user.type(input, "Ibadan");
+    
+    expect(input).toHaveValue("Ibadan");
+    expect(
+      screen.queryByRole("heading", { name: "City Details" })
+    ).not.toBeInTheDocument();
+    expect(mockUseCitySearch).not.toHaveBeenCalledWith("Ibadan");
+    
+    act(() => {
+      jest.advanceTimersByTime(500);
+    });
+    
+    expect(mockUseCitySearch).toHaveBeenLastCalledWith("Ibadan");
+  });
+
+  it("closes city detail through CityDetail close button", async () => {
+    jest.useFakeTimers();
+    mockUseCitySearch.mockReturnValue({
+      data: mockResults,
+      isFetching: false,
+      isError: false,
+      error: null
+    } as ReturnType<typeof useCitySearch>);
+
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    render(<Search />);
+
+    const input = screen.getByRole("combobox");
+    await user.type(input, "Lagos");
+    
+    act(() => {
+      jest.advanceTimersByTime(500);
+    });
+    
+    expect(mockUseCitySearch).toHaveBeenLastCalledWith("Lagos");
+    
+    const options = screen.getAllByRole("option");
+    
+    expect(options).toHaveLength(mockResults.length);
+    expect(
+      screen.getByRole("listbox")
+    ).toBeInTheDocument();
+
+    await user.keyboard("{ArrowDown}");
+    
+    expect(options[0]).toHaveAttribute("aria-selected", "true");
+    
+    await user.keyboard("{Enter}");
+    
+    expect(input).toHaveValue(mockResults[0].displayName);
+    
+    expect(
+      screen.getByRole("heading", { name: "City Details" })
+    ).toBeInTheDocument();
+
+    const detailContainer = screen.getByRole("heading", {
+      name: "City Details",
+    }).parentElement!;
+
+    const closeButton = within(detailContainer).getByRole(
+      "button", { name: "Close city details" }
+    );
+
+    await user.click(closeButton);
+
+    expect(input).toHaveValue("");
+    expect(
+      screen.queryByRole("listbox")
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole("heading", { name: "City Details" })
+    ).not.toBeInTheDocument();
+  });
+
+  it("resets the highlighted option when the dropdown is closed and reopened", async () => {
+    jest.useFakeTimers();
+    mockUseCitySearch.mockReturnValue({
+      data: mockResults,
+      isFetching: false,
+      isError: false,
+      error: null,
+    } as ReturnType<typeof useCitySearch>);
+
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    render(<Search />);
+
+    const input = screen.getByRole("combobox");
+    await user.type(input, "Lagos");
+    
+    act(() => {
+      jest.advanceTimersByTime(500);
+    });
+
+    expect(mockUseCitySearch).toHaveBeenLastCalledWith("Lagos");
+
+    let options = screen.getAllByRole("option");
+    
+    expect(options).toHaveLength(mockResults.length);
+    expect(
+      screen.getByRole("listbox")
+    ).toBeInTheDocument();
+
+    await user.keyboard("{ArrowDown}");
+    await user.keyboard("{ArrowDown}");
+
+    expect(options[1]).toHaveAttribute("aria-selected", "true");
+
+    await user.click(document.body);
+
+    expect(
+      screen.queryByRole("listbox")
+    ).not.toBeInTheDocument();
+
+    
+    await user.click(input);
+
+    expect(
+      screen.getByRole("listbox")
+    ).toBeInTheDocument();
+
+    options = screen.getAllByRole("option");
+
+    expect(options[0]).toHaveAttribute("aria-selected", "false");
+    expect(options[1]).toHaveAttribute("aria-selected", "false");
+  });
+
+  it("prevents stale result from being selected during a new search", async () => {
+    jest.useFakeTimers();
+    mockUseCitySearch.mockReturnValue({
+      data: mockResults,
+      isFetching: false,
+      isError: false,
+      error: null,
+    } as ReturnType<typeof useCitySearch>);
+
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    render(<Search />);
+
+    const input = screen.getByRole("combobox");
+    await user.type(input, "Lagos");
+    
+    act(() => {
+      jest.advanceTimersByTime(500);
+    });
+
+    expect(mockUseCitySearch).toHaveBeenLastCalledWith("Lagos");
+
+    expect(
+      screen.getByRole("option", { name: mockResults[0].displayName })
+    ).toBeInTheDocument();
+    
+    fireEvent.change(input, {
+      target: { value: "Ibadan" }
+    });
+
+    act(() => {
+      jest.advanceTimersByTime(499);
+    });
+
+    expect(
+      screen.queryByRole("option", { name: mockResults[0].displayName })
+    ).not.toBeInTheDocument();
+
+    await user.keyboard("{ArrowDown}");
+    await user.keyboard("{Enter}");
+
+    expect(
+      screen.queryByRole("heading", { name: "City Details" })
+    ).not.toBeInTheDocument();
+
+    expect(mockUseCitySearch).not.toHaveBeenCalledWith("Ibadan");
+
+    act(() => {
+      jest.advanceTimersByTime(1);
+    });
+
+    expect(mockUseCitySearch).toHaveBeenLastCalledWith("Ibadan");
+
+    const options = screen.getAllByRole("option");
+
+    expect(options).toHaveLength(mockResults.length);
+    expect(options[0]).toHaveAttribute("aria-selected", "false");
+    expect(options[1]).toHaveAttribute("aria-selected", "false");
+  });
+
+  it("shows the loading state when a new search is fetching while previous results exist", async () => {
+    jest.useFakeTimers();
+    mockUseCitySearch.mockImplementation((searchTerm) => {
+      if (searchTerm === "Lagos") {
+        return {
+          data: mockResults,
+          isFetching: false,
+          isError: false,
+          error: null,
+        } as ReturnType<typeof useCitySearch>;
+      }
+
+      if (searchTerm === "Ibadan") {
+        return {
+          data: mockResults,
+          isFetching: true,
+          isError: false,
+          error: null,
+        } as ReturnType<typeof useCitySearch>;
+      }
+
+      return {
+        data: [],
+        isFetching: false,
+        isError: false,
+        error: null,
+      } as ReturnType<typeof useCitySearch>;
+    });
+
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    render(<Search />);
+
+    const input = screen.getByRole("combobox");
+    await user.type(input, "Lagos");
+
+    act(() => {
+      jest.advanceTimersByTime(500);
+    });
+
+    expect(mockUseCitySearch).toHaveBeenLastCalledWith("Lagos");
+
+    expect(
+      screen.getByRole("option", { name: mockResults[0].displayName })
+    ).toBeInTheDocument();
+
+    fireEvent.change(input, {
+      target: { value: "Ibadan" },
+    });
+
+    act(() => {
+      jest.advanceTimersByTime(500);
+    });
+
+    expect(screen.getByText("Searching...")).toBeInTheDocument();
+    expect(
+      screen.queryByText(mockResults[0].displayName)
+    ).not.toBeInTheDocument();
+  });
+
+  it("shows the error state when a new search fails while previous results exist", async () => {
+    const errorMessage = "Unable to search locations.";
+    jest.useFakeTimers();
+    mockUseCitySearch.mockImplementation((searchTerm) => {
+      if (searchTerm === "Lagos") {
+        return {
+          data: mockResults,
+          isFetching: false,
+          isError: false,
+          error: null,
+        } as ReturnType<typeof useCitySearch>;
+      }
+
+      if (searchTerm === "Ibadan") {
+        return {
+          data: mockResults,
+          isFetching: false,
+          isError: true,
+          error: new Error(errorMessage),
+        } as ReturnType<typeof useCitySearch>;
+      }
+
+      return {
+        data: [],
+        isFetching: false,
+        isError: false,
+        error: null,
+      } as ReturnType<typeof useCitySearch>;
+    });
+
+    const user = userEvent.setup({
+      advanceTimers: jest.advanceTimersByTime,
+    });
+
+    render(<Search />);
+
+    const input = screen.getByRole("combobox");
+    await user.type(input, "Lagos");
+
+    act(() => {
+      jest.advanceTimersByTime(500);
+    });
+
+    expect(
+      screen.getByText(mockResults[0].displayName)
+    ).toBeInTheDocument();
+
+    fireEvent.change(input, {
+      target: { value: "Ibadan" },
+    });
+
+    act(() => {
+      jest.advanceTimersByTime(500);
+    });
+
+    expect(screen.getByText(errorMessage)).toBeInTheDocument();
+
+    expect(
+      screen.queryByText(mockResults[0].displayName)
     ).not.toBeInTheDocument();
   });
 });
