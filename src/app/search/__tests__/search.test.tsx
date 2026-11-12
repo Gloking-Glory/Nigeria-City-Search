@@ -1,6 +1,9 @@
 import {
   within, fireEvent, render, screen, act
 } from "@testing-library/react";
+import {
+  createQueryResult, createLoadingErrorResult, createRefetchErrorResult,
+} from "../testUtils/createQueryResult";
 import userEvent from "@testing-library/user-event";
 import Search from "../search";
 import { useCitySearch } from "@/src/hooks/useCitySearch";
@@ -25,13 +28,7 @@ describe("Search", () => {
 
   beforeEach(() => {
     mockUseCitySearch.mockReset();
-
-    mockUseCitySearch.mockReturnValue({
-      data: [],
-      isFetching: false,
-      isError: false,
-      error: null,
-    } as ReturnType<typeof useCitySearch>);
+    mockUseCitySearch.mockReturnValue(createQueryResult());
   });
 
   afterEach(() => {
@@ -179,12 +176,11 @@ describe("Search", () => {
 
   it("displays dropdown after debounce period completed", async () => {
     jest.useFakeTimers();
-    mockUseCitySearch.mockImplementation((search) => ({
-      data: search === "Lagos" ? [mockCity] : [],
-      isFetching: false,
-      isError: false,
-      error: null,
-    } as ReturnType<typeof useCitySearch>));
+    mockUseCitySearch.mockImplementation((search) =>
+      createQueryResult({
+        data: search === "Lagos" ? [mockCity] : [],
+      })
+    );
 
     const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
     render(<Search />);
@@ -209,12 +205,11 @@ describe("Search", () => {
 
   it("displays returned cities in the dropdown", async () => {
     jest.useFakeTimers();
-    mockUseCitySearch.mockImplementation((search) => ({
-      data: search === "Lagos" ? mockResults : [],
-      isFetching: false,
-      isError: false,
-      error: null,
-    } as ReturnType<typeof useCitySearch>));
+    mockUseCitySearch.mockImplementation((search) =>
+      createQueryResult({
+        data: search === "Lagos" ? mockResults : [],
+      })
+    );
 
     const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
     render(<Search />);
@@ -249,13 +244,10 @@ describe("Search", () => {
 
   it("displays loading state while fetching results", async () => {
     jest.useFakeTimers();
-    mockUseCitySearch.mockImplementation(() => ({
-      data: [],
-      isFetching: true,
-      isError: false,
-      error: null,
-    } as ReturnType<typeof useCitySearch>));
-
+    mockUseCitySearch.mockReturnValue(createQueryResult({
+      isFetching: true
+    }));
+    
     const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
     render(<Search />);
 
@@ -277,13 +269,8 @@ describe("Search", () => {
 
   it("displays empty result message when no city is found", async () => {
     jest.useFakeTimers();
-    mockUseCitySearch.mockReturnValue({
-      data: [],
-      isFetching: false,
-      isError: false,
-      error: null,
-    } as ReturnType<typeof useCitySearch>);
-
+    mockUseCitySearch.mockReturnValue(createQueryResult());
+    
     const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
     render(<Search />);
 
@@ -305,12 +292,9 @@ describe("Search", () => {
 
   it("displays an error message when search fails", async () => {
     jest.useFakeTimers();
-    mockUseCitySearch.mockReturnValue({
-      data: [],
-      isFetching: false,
-      isError: true,
-      error: new Error("Failed to fetch cities"),
-    } as ReturnType<typeof useCitySearch>);
+    mockUseCitySearch.mockReturnValue(
+      createLoadingErrorResult(new Error("Failed to fetch cities"))
+    );
 
     const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
     render(<Search />);
@@ -334,12 +318,11 @@ describe("Search", () => {
 
   it("displays fallback error message when error is not an Error instance", async () => {
     jest.useFakeTimers();
-    mockUseCitySearch.mockReturnValue({
-      data: [],
-      isFetching: false,
-      isError: true,
-      error: "Unable to search locations.",
-    } as ReturnType<typeof useCitySearch>);
+    mockUseCitySearch.mockReturnValue(
+      createLoadingErrorResult(
+        "Unable to search locations." as unknown as Error
+      )
+    );
 
     const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
     render(<Search />);
@@ -363,12 +346,11 @@ describe("Search", () => {
 
   it("hides the dropdown when the input has fewer than 3 characters", async () => {
     jest.useFakeTimers();
-    mockUseCitySearch.mockReturnValue({
-      data: mockResults,
-      isFetching: false,
-      isError: false,
-      error: null,
-    } as ReturnType<typeof useCitySearch>);
+    mockUseCitySearch.mockReturnValue(
+      createQueryResult({
+        data: mockResults,
+      })
+    );
 
     const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
     render(<Search />);
@@ -402,12 +384,11 @@ describe("Search", () => {
 
   it("clears selected city details when the user starts a new short search", async () => {
     jest.useFakeTimers();
-    mockUseCitySearch.mockReturnValue({
-      data: [mockCity],
-      isFetching: false,
-      isError: false,
-      error: null
-    } as ReturnType<typeof useCitySearch>);
+    mockUseCitySearch.mockReturnValue(
+      createQueryResult({
+        data: [mockCity],
+      })
+    );
 
     const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
     render(<Search />);
@@ -445,12 +426,11 @@ describe("Search", () => {
 
   it("closes the dropdown when the user clicks outside the search area", async () => {
     jest.useFakeTimers();
-    mockUseCitySearch.mockReturnValue({
-      data: mockResults,
-      isFetching: false,
-      isError: false,
-      error: null,
-    } as ReturnType<typeof useCitySearch>);
+    mockUseCitySearch.mockReturnValue(
+      createQueryResult({
+        data: mockResults,
+      })
+    );
 
     const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
     render(<Search />);
@@ -477,12 +457,11 @@ describe("Search", () => {
 
   it("reopens the dropdown when the user focuses on the input after clicking outside", async () => {
     jest.useFakeTimers();
-    mockUseCitySearch.mockReturnValue({
-      data: mockResults,
-      isFetching: false,
-      isError: false,
-      error: null,
-    } as ReturnType<typeof useCitySearch>);
+    mockUseCitySearch.mockReturnValue(
+      createQueryResult({
+        data: mockResults,
+      })
+    );
 
     const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
     render(<Search />);
@@ -518,12 +497,11 @@ describe("Search", () => {
 
   it("selects a city when the user clicks a dropdown result", async () => {
     jest.useFakeTimers();
-    mockUseCitySearch.mockReturnValue({
-      data: mockResults,
-      isFetching: false,
-      isError: false,
-      error: null,
-    } as ReturnType<typeof useCitySearch>);
+    mockUseCitySearch.mockReturnValue(
+      createQueryResult({
+        data: mockResults,
+      })
+    );
 
     const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
     render(<Search />);
@@ -570,12 +548,11 @@ describe("Search", () => {
 
   it("displays the selected city details", async () => {
     jest.useFakeTimers();
-    mockUseCitySearch.mockReturnValue({
-      data: mockResults,
-      isFetching: false,
-      isError: false,
-      error: null,
-    } as ReturnType<typeof useCitySearch>);
+    mockUseCitySearch.mockReturnValue(
+      createQueryResult({
+        data: mockResults,
+      })
+    );
 
     const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
     render(<Search />);
@@ -628,12 +605,11 @@ describe("Search", () => {
 
   it("highlights results when the user presses ArrowDown", async () => {
     jest.useFakeTimers();
-    mockUseCitySearch.mockReturnValue({
-      data: mockResults,
-      isFetching: false,
-      isError: false,
-      error: null,
-    } as ReturnType<typeof useCitySearch>);
+    mockUseCitySearch.mockReturnValue(
+      createQueryResult({
+        data: mockResults,
+      })
+    );
 
     const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
     render(<Search />);
@@ -670,12 +646,11 @@ describe("Search", () => {
 
   it("highlights the previous result when the user presses ArrowUp", async () => {
     jest.useFakeTimers();
-    mockUseCitySearch.mockReturnValue({
-      data: mockResults,
-      isFetching: false,
-      isError: false,
-      error: null,
-    } as ReturnType<typeof useCitySearch>);
+    mockUseCitySearch.mockReturnValue(
+      createQueryResult({
+        data: mockResults,
+      })
+    );
 
     const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
     render(<Search />);
@@ -707,12 +682,11 @@ describe("Search", () => {
 
   it("wraps to the last result when ArrowUp is pressed on the first result", async () => {
     jest.useFakeTimers();
-    mockUseCitySearch.mockReturnValue({
-      data: mockResults,
-      isFetching: false,
-      isError: false,
-      error: null,
-    } as ReturnType<typeof useCitySearch>);
+    mockUseCitySearch.mockReturnValue(
+      createQueryResult({
+        data: mockResults,
+      })
+    );
 
     const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
     render(<Search />);
@@ -744,12 +718,11 @@ describe("Search", () => {
 
   it("wraps to the first result when ArrowDown is pressed on the last result", async () => {
     jest.useFakeTimers();
-    mockUseCitySearch.mockReturnValue({
-      data: mockResults,
-      isFetching: false,
-      isError: false,
-      error: null,
-    } as ReturnType<typeof useCitySearch>);
+    mockUseCitySearch.mockReturnValue(
+      createQueryResult({
+        data: mockResults,
+      })
+    );
 
     const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
     render(<Search />);
@@ -783,12 +756,11 @@ describe("Search", () => {
 
   it("selects the highlighted result when the user presses Enter", async () => {
     jest.useFakeTimers();
-    mockUseCitySearch.mockReturnValue({
-      data: mockResults,
-      isFetching: false,
-      isError: false,
-      error: null,
-    } as ReturnType<typeof useCitySearch>);
+    mockUseCitySearch.mockReturnValue(
+      createQueryResult({
+        data: mockResults,
+      })
+    );
 
     const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
     render(<Search />);
@@ -834,12 +806,11 @@ describe("Search", () => {
 
   it("does not select a result when Enter is pressed without highlighted result", async () => {
     jest.useFakeTimers();
-    mockUseCitySearch.mockReturnValue({
-      data: mockResults,
-      isFetching: false,
-      isError: false,
-      error: null,
-    } as ReturnType<typeof useCitySearch>);
+    mockUseCitySearch.mockReturnValue(
+      createQueryResult({
+        data: mockResults,
+      })
+    );
 
     const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
     render(<Search />);
@@ -869,13 +840,8 @@ describe("Search", () => {
 
   it("does not highlight or select a result when there are no results", async () => {
     jest.useFakeTimers();
-    mockUseCitySearch.mockReturnValue({
-      data: [],
-      isFetching: false,
-      isError: false,
-      error: null,
-    } as ReturnType<typeof useCitySearch>);
-
+    mockUseCitySearch.mockReturnValue(createQueryResult());
+    
     const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
     render(<Search />);
 
@@ -907,12 +873,11 @@ describe("Search", () => {
 
   it("resets the highlighted index when the search term changes", async () => {
     jest.useFakeTimers();
-    mockUseCitySearch.mockReturnValue({
-      data: mockResults,
-      isFetching: false,
-      isError: false,
-      error: null,
-    } as ReturnType<typeof useCitySearch>);
+    mockUseCitySearch.mockReturnValue(
+      createQueryResult({
+        data: mockResults,
+      })
+    );
 
     const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
     render(<Search />);
@@ -952,12 +917,11 @@ describe("Search", () => {
 
   it("closes the dropdown when Escape is pressed", async () => {
     jest.useFakeTimers();
-    mockUseCitySearch.mockReturnValue({
-      data: mockResults,
-      isFetching: false,
-      isError: false,
-      error: null,
-    } as ReturnType<typeof useCitySearch>);
+    mockUseCitySearch.mockReturnValue(
+      createQueryResult({
+        data: mockResults,
+      })
+    );
 
     const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
     render(<Search />);
@@ -988,12 +952,11 @@ describe("Search", () => {
 
   it("closes selected city details when Escape is pressed", async () => {
     jest.useFakeTimers();
-    mockUseCitySearch.mockReturnValue({
-      data: mockResults,
-      isFetching: false,
-      isError: false,
-      error: null,
-    } as ReturnType<typeof useCitySearch>);
+    mockUseCitySearch.mockReturnValue(
+      createQueryResult({
+        data: mockResults,
+      })
+    );
 
     const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
     render(<Search />);
@@ -1035,13 +998,8 @@ describe("Search", () => {
 
   it("does nothing when Escape is pressed while dropdown and city details are closed", async () => {
     jest.useFakeTimers();
-    mockUseCitySearch.mockReturnValue({
-      data: [],
-      isFetching: false,
-      isError: false,
-      error: null,
-    } as ReturnType<typeof useCitySearch>);
-
+    mockUseCitySearch.mockReturnValue(createQueryResult());
+    
     const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
     render(<Search />);
 
@@ -1067,12 +1025,11 @@ describe("Search", () => {
 
   it("keeps the dropdown open when the user clicks inside the search area", async () => {
     jest.useFakeTimers();
-    mockUseCitySearch.mockReturnValue({
-      data: mockResults,
-      isFetching: false,
-      isError: false,
-      error: null,
-    } as ReturnType<typeof useCitySearch>);
+    mockUseCitySearch.mockReturnValue(
+      createQueryResult({
+        data: mockResults,
+      })
+    );
 
     const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
     render(<Search />);
@@ -1102,12 +1059,9 @@ describe("Search", () => {
 
   it("clears selected city details when a new valid search starts", async () => {
     jest.useFakeTimers();
-    mockUseCitySearch.mockReturnValue({
-      data: mockResults,
-      isFetching: false,
-      isError: false,
-      error: null
-    } as ReturnType<typeof useCitySearch>);
+    mockUseCitySearch.mockReturnValue(
+      createQueryResult({ data: mockResults })
+    );
 
     const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
     render(<Search />);
@@ -1148,12 +1102,9 @@ describe("Search", () => {
 
   it("closes city detail through CityDetail close button", async () => {
     jest.useFakeTimers();
-    mockUseCitySearch.mockReturnValue({
-      data: mockResults,
-      isFetching: false,
-      isError: false,
-      error: null
-    } as ReturnType<typeof useCitySearch>);
+    mockUseCitySearch.mockReturnValue(
+      createQueryResult({ data: mockResults })
+    );
 
     const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
     render(<Search />);
@@ -1207,12 +1158,11 @@ describe("Search", () => {
 
   it("resets the highlighted option when the dropdown is closed and reopened", async () => {
     jest.useFakeTimers();
-    mockUseCitySearch.mockReturnValue({
-      data: mockResults,
-      isFetching: false,
-      isError: false,
-      error: null,
-    } as ReturnType<typeof useCitySearch>);
+    mockUseCitySearch.mockReturnValue(
+      createQueryResult({
+        data: mockResults,
+      })
+    );
 
     const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
     render(<Search />);
@@ -1259,12 +1209,11 @@ describe("Search", () => {
 
   it("prevents stale result from being selected during a new search", async () => {
     jest.useFakeTimers();
-    mockUseCitySearch.mockReturnValue({
-      data: mockResults,
-      isFetching: false,
-      isError: false,
-      error: null,
-    } as ReturnType<typeof useCitySearch>);
+    mockUseCitySearch.mockReturnValue(
+      createQueryResult({
+        data: mockResults,
+      })
+    );
 
     const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
     render(<Search />);
@@ -1318,31 +1267,19 @@ describe("Search", () => {
 
   it("shows the loading state when a new search is fetching while previous results exist", async () => {
     jest.useFakeTimers();
-    mockUseCitySearch.mockImplementation((searchTerm) => {
-      if (searchTerm === "Lagos") {
-        return {
-          data: mockResults,
-          isFetching: false,
-          isError: false,
-          error: null,
-        } as ReturnType<typeof useCitySearch>;
+    mockUseCitySearch.mockImplementation((search) => {
+      if (search === "Lagos") {
+        return createQueryResult({ data: mockResults })
       }
 
-      if (searchTerm === "Ibadan") {
-        return {
+      if (search === "Ibadan") {
+        return createQueryResult({
           data: mockResults,
           isFetching: true,
-          isError: false,
-          error: null,
-        } as ReturnType<typeof useCitySearch>;
+        })
       }
 
-      return {
-        data: [],
-        isFetching: false,
-        isError: false,
-        error: null,
-      } as ReturnType<typeof useCitySearch>;
+      return createQueryResult();
     });
 
     const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
@@ -1380,29 +1317,17 @@ describe("Search", () => {
     jest.useFakeTimers();
     mockUseCitySearch.mockImplementation((searchTerm) => {
       if (searchTerm === "Lagos") {
-        return {
-          data: mockResults,
-          isFetching: false,
-          isError: false,
-          error: null,
-        } as ReturnType<typeof useCitySearch>;
+        return createQueryResult({ data: mockResults });
       }
 
       if (searchTerm === "Ibadan") {
-        return {
-          data: mockResults,
-          isFetching: false,
-          isError: true,
-          error: new Error(errorMessage),
-        } as ReturnType<typeof useCitySearch>;
+        return createRefetchErrorResult(
+          mockResults,
+          new Error(errorMessage)
+        );
       }
 
-      return {
-        data: [],
-        isFetching: false,
-        isError: false,
-        error: null,
-      } as ReturnType<typeof useCitySearch>;
+      return createQueryResult();
     });
 
     const user = userEvent.setup({
