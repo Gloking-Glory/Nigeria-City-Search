@@ -46,16 +46,15 @@ export default function Search() {
     const search = searchValue.trim();
 
     setHighlightedIndex(-1);
+    setSelectedCity(null);
 
     if (search.length < 3) {
       setCitySearch("");
-      setSelectedCity(null);
       setShowDropdown(false);
       return;
     }
 
     setShowDropdown(false);
-    setHighlightedIndex(-1);
 
     const searchTimeout = setTimeout(() => {
       setCitySearch(search);

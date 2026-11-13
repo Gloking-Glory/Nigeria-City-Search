@@ -902,8 +902,9 @@ describe("Search", () => {
 
     expect(options[1]).toHaveAttribute("aria-selected", "true");
 
-    await user.clear(input);
-    await user.type(input, "Lagos");
+    fireEvent.change(input, {
+      target: { value: "Lagos" }
+    });
 
     act(() => {
       jest.advanceTimersByTime(500);
@@ -1084,8 +1085,9 @@ describe("Search", () => {
       screen.getByRole("heading", { name: "City Details" })
     ).toBeInTheDocument();
 
-    await user.clear(input);
-    await user.type(input, "Ibadan");
+    fireEvent.change(input, {
+      target: { value: "Ibadan" }
+    });
     
     expect(input).toHaveValue("Ibadan");
     expect(
@@ -1240,6 +1242,10 @@ describe("Search", () => {
     });
 
     expect(
+      screen.queryByRole("listbox")
+    ).not.toBeInTheDocument();
+
+    expect(
       screen.queryByRole("option", { name: mockResults[0].displayName })
     ).not.toBeInTheDocument();
 
@@ -1257,6 +1263,9 @@ describe("Search", () => {
     });
 
     expect(mockUseCitySearch).toHaveBeenLastCalledWith("Ibadan");
+    expect(
+      screen.getByRole("listbox")
+    ).toBeInTheDocument();
 
     const options = screen.getAllByRole("option");
 

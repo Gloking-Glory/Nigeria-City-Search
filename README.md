@@ -1,8 +1,8 @@
 # Nigeria City Search
 
-A responsive typeahead/autocomplete search for discovering cities and settlements across Nigeria.
+A responsive web application for searching and exploring cities and settlements across Nigeria.
 
-Built as a frontend simple application using **Next.js, React, TypeScript, Tailwind CSS, React Hook Form, TanStack Query, and Open-Meteo**.
+Nigeria City Search provides a typeahead search experience that helps users find locations, browse matching results, and view details about selected cities. It uses the Open-Meteo Geocoding API for location data and TanStack Query to manage API requests, caching, and loading states.
 
 ## Live Demo
 
@@ -10,74 +10,128 @@ Built as a frontend simple application using **Next.js, React, TypeScript, Tailw
 
 ## Features
 
-* Typeahead search for Nigerian cities
-* 500ms debounced search
-* Minimum 3-character search
-* Loading, empty, and error states
-* Mouse and keyboard navigation
-* `ArrowUp` / `ArrowDown` navigation with scroll support
-* `Enter` to select a result
-* `Escape` to close
-* Click-away dropdown handling
-* Scrollable results
-* Selected city details
-* Accessible combobox/listbox semantics
-* Request cancellation and query caching
-* Responsive UI
+- Search for cities and settlements across Nigeria.
+- Typeahead search with a 500ms debounce.
+- Minimum three-character search requirement.
+- Loading, empty, and error states.
+- Keyboard and mouse navigation through search results.
+- `ArrowUp` and `ArrowDown` navigation with automatic scrolling.
+- `Enter` to select a search result.
+- `Escape` to close the dropdown or selected city details.
+- Click-away handling to close the search dropdown.
+- Scrollable search results.
+- Detailed information for selected locations.
+- Accessible combobox and listbox interactions.
+- Request cancellation and query caching.
+- Responsive layouts for different screen sizes.
 
 ## Tech Stack
 
-* **Next.js** — application framework
-* **React + TypeScript** — UI and type safety
-* **Tailwind CSS** — styling and responsive design
-* **React Hook Form** — form and input handling
-* **TanStack Query** — server state, caching, and request lifecycle
-* **Open-Meteo Geocoding API** — location search data
-* **Vercel** — deployment
+- **Next.js** – application framework.
+- **React** – component-based user interface.
+- **TypeScript** – static typing and type safety.
+- **Tailwind CSS** – styling and responsive layouts.
+- **React Hook Form** – form and search input management.
+- **TanStack Query** – server state, caching, and request lifecycle management.
+- **Open-Meteo Geocoding API** – location search data.
+- **Jest and React Testing Library** – unit and component testing.
+- **Vercel** – deployment.
 
 ## How It Works
 
+The search process follows this flow:
+
 ```text
-User types
-    ↓
-3+ characters
-    ↓
-500ms debounce
-    ↓
+User enters a search term
+          ↓
+Validate minimum 3 characters
+          ↓
+Wait 500ms (debounce)
+          ↓
 TanStack Query
-    ↓
+          ↓
 Open-Meteo Geocoding API
-    ↓
-Display results
-    ↓
-Select city
-    ↓
-Show city details
+          ↓
+Display matching locations
+          ↓
+User selects a result
+          ↓
+Display selected city details
 ```
 
-TanStack Query uses the search term as part of the query key and passes an `AbortSignal` to the API request. This allows previous requests to be cancelled when appropriate while keeping each search associated with its own query state.
+The search input is managed with React Hook Form, while TanStack Query handles API requests and server state.
 
-## Tradeoffs, Scaling & Testing
+The search term is included in the TanStack Query key, keeping results associated with their respective searches and allowing previously fetched results to be cached.
 
-I intentionally kept the implementation lightweight and focused on the assessment requirements rather than introducing unnecessary abstractions or dependencies. A 500ms debounce and minimum three-character search threshold reduce unnecessary API requests while keeping the search responsive. TanStack Query provides caching, query lifecycle management, and request cancellation through `AbortSignal`.
+An `AbortSignal` is passed from the query function to the API request. This supports cancellation when a query is no longer needed, helping avoid unnecessary network requests as users change their search terms.
 
-For higher traffic, I would move the geocoding request behind a server-side endpoint. This would provide better control over rate limiting, caching, request validation, timeouts, monitoring, and upstream API usage. Frequently searched locations could also be cached at the server or CDN level. At significantly higher scale, I would consider a dedicated geocoding provider or an indexed location database.
+## Implementation Decisions
 
-For testing, I would use Jest and React Testing Library to cover debounce behaviour, minimum search length, loading, empty and error states, keyboard navigation, result selection, Escape handling, click-away behaviour, and stale-response scenarios. I would also add an end-to-end test covering the main search flow.
+The application uses a 500ms debounce and a minimum three-character search threshold to reduce unnecessary API requests while keeping the search experience responsive.
+
+TanStack Query handles caching, query state, and request cancellation, avoiding the need to manage these concerns manually.
+
+The Open-Meteo Geocoding API was selected because it provides searchable location information without requiring an API key for this use case. Requests are filtered to Nigeria, and the returned data includes available location details such as city name, state, and administrative areas.
+
+The application is intentionally focused on the search experience without introducing unnecessary dependencies or abstractions.
+
+For a higher-traffic production application, I would consider introducing a server-side API layer to provide better control over rate limiting, caching, request validation, timeouts, monitoring, and upstream API usage.
+
+Other possible improvements include:
+
+- Server-side or CDN caching for frequently searched locations.
+- More detailed location information.
+- A dedicated geocoding provider or indexed location database if usage grows significantly.
+
+## Testing
+
+The project uses Jest and React Testing Library to test application behaviour and user interactions.
+
+The search component tests cover:
+
+- Initial rendering and input validation.
+- Minimum search length and debounce behaviour.
+- Cancellation of pending debounced searches.
+- Loading, empty, and error states.
+- Displaying search results.
+- Mouse selection and keyboard navigation.
+- Arrow key navigation and result highlighting.
+- Escape key handling.
+- Dropdown visibility and click-away behaviour.
+- Selected city details and closing interactions.
+- Switching between search terms.
+- Preventing stale or previous results from being selected during a new search.
+- Loading and error states when previous results exist.
+
+The API service and custom search hook also have separate tests covering request parameters, response transformation, error handling, and query behaviour.
 
 ## Running Locally
 
+Clone the repository:
+
 ```bash
 git clone https://github.com/Gloking-Glory/Nigeria-City-Search.git
+```
 
+Navigate into the project directory:
+
+```bash
 cd Nigeria-City-Search
+```
 
+Install dependencies:
+
+```bash
 npm install
+```
 
+Start the development server:
+
+```bash
 npm run dev
 ```
 
-Open `http://localhost:3000`.
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
 To verify the production build:
 
@@ -87,17 +141,20 @@ npm run build
 
 ## API
 
-This project uses the public **Open-Meteo Geocoding API** to search for locations in Nigeria.
+This project uses the public [Open-Meteo Geocoding API](https://open-meteo.com/en/docs/geocoding-api) to retrieve location search results.
 
-The API does not require an API key for the use case covered by this assessment.
+The API request uses the Nigeria country filter and returns available location information, including city names, states, and administrative areas.
 
-For a production application with significantly higher traffic, I would introduce a server-side integration with appropriate caching, rate limiting, monitoring, and timeout handling, or use a geocoding provider designed for the expected production workload.
+No API key is required for the functionality used in this project.
+
+For applications with higher traffic or more demanding production requirements, a server-side integration with appropriate caching, rate limiting, monitoring, and timeout handling would provide greater control over API usage.
 
 ## Project Structure
 
 ```text
 src/
 ├── app/
+|   |── search/
 ├── components/
 │   ├── search/
 │   └── utilities/
@@ -110,4 +167,4 @@ src/
 
 **Glory Ayanwola**
 
-[LinkedIn](https://linkedin.com/in/ayanwola-glory) · [GitHub](https://github.com/Gloking-Glory)
+[LinkedIn](https://linkedin.com/in/ayanwola-glory) · [GitHub](https://github.com/Gloking-Glory) · [Email](mailto:ayanwolaglory@gmail.com)
